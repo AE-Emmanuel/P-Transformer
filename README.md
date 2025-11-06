@@ -1,15 +1,15 @@
-# P-Transformer: A GPT-style Model for Python Code
+# P-Transformer: A GPT for Python Code
 
-This project is a complete implementation of a decoder-only transformer (like GPT) built from scratch in PyTorch. It follows the educational structure of Andrej Karpathy's "Let's build GPT" video, but is adapted to train on a large-scale dataset of Python code instead of Shakespeare.
+This project is a complete implementation of a decoder-only transformer built from scratch in PyTorch. It follows instructions of Andrej Karpathy's "Let's build GPT" video, but is adapted to train on a large-scale dataset -> bigcode/the-stack-v2-dedup.
 
-The final model is a 6-layer, 6-head transformer with ~77 million parameters, trained on a subset of "The Stack" dataset.
+The final model is a 6-layer, 6-head transformer with ~77 million parameters.
 
 ## 🚀 Final Result
 
-After training for 5,000 steps on a single NVIDIA A100 GPU, the model achieved:
+After training for 5,000 steps on a single A100 GPU, the model achieved:
 * **Final Validation Loss:** `4.5826`
 
-It is capable of generating coherent, syntactically-aware (though not perfect) Python code snippets:
+It is capable of generating coherent, syntactically-aware Python code snippets :
 
 ```python
         try:
@@ -25,7 +25,7 @@ It is capable of generating coherent, syntactically-aware (though not perfect) P
 
     except AttributeError("error cannot be requested after but if one of "
                     "ellipsisapy generic ensure that contains classes.")
-
+```
 🏗️ Architecture
 This model is a decoder-only transformer built from the ground up. All key components are implemented from scratch in train.py:
 
