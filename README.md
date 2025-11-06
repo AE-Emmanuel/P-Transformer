@@ -37,8 +37,6 @@ Self-Attention Head: Scaled Dot-Product Attention
 
 Multi-Head Attention: Parallel attention heads with projection
 
-Feed-Forward Network: Standard 4x "thinking" layer
-
-Transformer Block: The complete unit with residual connections and layer normalization
-
-Training: Full training and validation loops with the AdamW optimizer.
+### Note:
+This v1.0 of the model cause it's significantly undertrained.
+I created this model to learn the core architecture by experimenting it with some new datasets 
