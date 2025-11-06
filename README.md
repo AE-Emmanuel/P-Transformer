@@ -1,6 +1,6 @@
 # P-Transformer: A GPT for Python Code
 
-This project is a complete implementation of a decoder-only transformer built from scratch in PyTorch. It follows instructions of Andrej Karpathy's "Let's build GPT" video, but is adapted to train on a large-scale dataset -> bigcode/the-stack-v2-dedup.
+This project is a complete implementation of a decoder-only transformer built from scratch in PyTorch. It follows instructions of Andrej Karpathy's "Let's build GPT" video, but is adapted to train on a large-scale dataset -> bigcode/the-stack-v2-dedup and also has some other major changes with tokenization.
 
 The final model is a 6-layer, 6-head transformer with ~77 million parameters.
 
