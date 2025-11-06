@@ -4,7 +4,7 @@ from torch.nn import functional as F
 import numpy as np
 import tiktoken
 
-# --- 1. Configuration ---
+# --- Configuration ---
 torch.manual_seed(1337)
 batch_size = 24  
 block_size = 256     
@@ -20,8 +20,8 @@ dropout = 0.2
 max_iters = 5000         
 eval_interval = 500
 eval_iters = 200      
-device = 'cuda' if torch.cuda.is_available() else 'cpu' # Use GPU if available
-if torch.backends.mps.is_available(): # Check for Apple Silicon GPU
+device = 'cuda' if torch.cuda.is_available() else 'cpu' 
+if torch.backends.mps.is_available(): 
     device = 'mps'
 print(f"Using device: {device}")
 
@@ -30,7 +30,7 @@ enc = tiktoken.get_encoding("o200k_base")
 model_vocab_size = enc.n_vocab
 print(f"Tokenizer vocab size: {model_vocab_size}")
 
-# --- 2. Data Loading ---
+# --- Data Loading ---
 # Load data from .bin files
 train_data_np = np.fromfile('train.bin', dtype=np.uint32)
 val_data_np = np.fromfile('val.bin', dtype=np.uint32)
@@ -40,7 +40,7 @@ train_data = torch.from_numpy(train_data_np.astype(np.int64))
 val_data = torch.from_numpy(val_data_np.astype(np.int64))
 print("Data loaded into tensors.")
 
-# --- 3. The `get_batch` function ---
+# --- The `get_batch` function ---
 def get_batch(split):
     data = train_data if split == 'train' else val_data
     ix = torch.randint(len(data) - block_size, (batch_size,))
@@ -64,23 +64,23 @@ class Head(nn.Module):
 
     def forward(self, x):
         B, T, C = x.shape
-        k = self.key(x)   # (B, T, head_size)
-        q = self.query(x) # (B, T, head_size)
+        k = self.key(x)   
+        q = self.query(x) 
 
         # Compute attention scores
-        wei = q @ k.transpose(-2, -1) * self.head_size**-0.5 # (B, T, T)
+        wei = q @ k.transpose(-2, -1) * self.head_size**-0.5 
 
         # Apply the causal mask
         wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf')) # since this is here this is a decoder only model
 
         # Softmax to get probabilities
-        wei = F.softmax(wei, dim=-1) # (B, T, T)
+        wei = F.softmax(wei, dim=-1) 
         wei = self.dropout(wei)
 
-        v = self.value(x) # (B, T, head_size)
+        v = self.value(x) 
 
         # Weighted sum of values
-        out = wei @ v # (B, T, head_size)
+        out = wei @ v 
         return out
 
 class MultiHeadAttention(nn.Module): #multiple parallel communication layer
@@ -99,7 +99,7 @@ class FeedForward(nn.Module): #computation layer
     def __init__(self, n_embd):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(n_embd, 4 * n_embd), #expand to 4 times the embedding dimension of the inner layer
+            nn.Linear(n_embd, 4 * n_embd), 
             nn.ReLU(),
             nn.Linear(4 * n_embd, n_embd),
             nn.Dropout(dropout),
@@ -134,24 +134,21 @@ class SimpleLanguageModel(nn.Module):
         # Stack of Transformer Blocks
         self.blocks = nn.Sequential(*[Block(n_embd, n_heads=n_heads) for _ in range(n_layers)])
         self.ln_f = nn.LayerNorm(n_embd)
-        # 2. Language Model Head: (EmbDim, VocabSize)
+        # Language Model Head: (EmbDim, VocabSize)
         self.lm_head = nn.Linear(n_embd, model_vocab_size)
 
 
     def forward(self, idx, targets=None):
-        # idx is (B, T) tensor of token IDs
+
         B, T = idx.shape
-        # 1. Get Token Embeddings
-        # tok_emb shape: (B, T, n_embd)
+        # Get Token Embeddings
         tok_emb = self.token_embedding_table(idx) 
-        pos_emb = self.positional_embedding_table(torch.arange(T, device=device)) # (T, n_embd)
-        x= tok_emb + pos_emb # (B, T, n_embd)
-        x = self.blocks(x) # (B, T, n_embd)
+        pos_emb = self.positional_embedding_table(torch.arange(T, device=device)) 
+        x= tok_emb + pos_emb
+        x = self.blocks(x) 
         x = self.ln_f(x)
         
-        # 2. Get Logits
-        # We pass the embeddings through the LM head
-        # logits shape: (B, T, vocab_size)
+        # Get Logits
         logits = self.lm_head(x)
 
         
@@ -168,26 +165,19 @@ class SimpleLanguageModel(nn.Module):
         return logits, loss
     
     def generate(self, idx, max_new_tokens):
-        # idx is (B, T) array of indices in the current context
+        
         for _ in range(max_new_tokens):
             # --- Get the predictions (forward pass) ---
-            idx_cond = idx[:, -block_size:] # crop to the last block_size tokens
+            idx_cond = idx[:, -block_size:] 
             logits, loss = self(idx_cond)
-            
-            # --- Focus only on the last time step ---
-            # The model predicts the next token for *every* token in the sequence
-            # We only care about the *last* one.
-            logits_last_step = logits[:, -1, :] # becomes (B, C)
+            logits_last_step = logits[:, -1, :]
             
             # --- Apply softmax to get probabilities ---
-            probs = F.softmax(logits_last_step, dim=-1) # (B, C)
-            
-            # --- Sample from the distribution ---
-            # This is where we "roll the dice"
-            idx_next = torch.multinomial(probs, num_samples=1) # (B, 1)
+            probs = F.softmax(logits_last_step, dim=-1)
+            idx_next = torch.multinomial(probs, num_samples=1)
             
             # --- Append sampled index to the running sequence ---
-            idx = torch.cat((idx, idx_next), dim=1) # (B, T+1)
+            idx = torch.cat((idx, idx_next), dim=1) 
             
         return idx
 
@@ -204,10 +194,10 @@ logits, loss = m(xb, yb)
 optimizer = torch.optim.AdamW(m.parameters(), lr=learning_rate)
 
 
-@torch.no_grad()  # Tell PyTorch we don't need to calculate gradients here
+@torch.no_grad()  
 def estimate_loss():
     out = {}
-    m.eval()  # Set the model to evaluation mode
+    m.eval()  
     for split in ['train', 'val']:
         losses = torch.zeros(eval_iters)
         for k in range(eval_iters):
@@ -215,31 +205,29 @@ def estimate_loss():
             logits, loss = m(X, Y)
             losses[k] = loss.item()
         out[split] = losses.mean()
-    m.train() # Set the model back to training mode
+    m.train() 
     return out
 
-# --- 8. The Training Loop ---
-print("Starting training loop...")
-for iter in range(max_iters):
+# ---The Training Loop ---
 
-    # Every once in a while, evaluate the loss on train and val sets
+for iter in range(max_iters):
     if iter % eval_interval == 0:
         losses = estimate_loss()
         print(f"Step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
 
-    # 1. Get a batch of data
+    # Get a batch of data
     xb, yb = get_batch('train')
 
-    # 2. Forward pass: evaluate the loss
+    # Forward pass: evaluate the loss
     logits, loss = m(xb, yb)
 
-    # 3. Zero gradients from previous step
+    #  Zero gradients from previous step
     optimizer.zero_grad(set_to_none=True)
 
-    # 4. Backward pass: get gradients
+    #  Backward pass: get gradients
     loss.backward()
 
-    # 5. Update weights
+    #  Update weights
     optimizer.step()
 
 print("Training finished.")
@@ -248,7 +236,6 @@ print("Training finished.")
 enc = tiktoken.get_encoding("o200k_base")
 
 # Start with a single "newline" token
-# We use device=device to make sure it's on the GPU/MPS
 start_context = torch.tensor(enc.encode('\n'), dtype=torch.long, device=device).unsqueeze(0)
 
 # Generate 100 new tokens
