@@ -1,0 +1,59 @@
+# Python-generated files
+__pycache__/
+*.py[cod]
+*.py[cod]\n
+# Distribution / packaging
+build/
+dist/
+eggs/
+*.egg-info/
+pip-wheel-metadata/
+input.txt
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
+
+# Editor/IDE settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Pytest, mypy, coverage
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# macOS
+.DS_Store
+
+# Data, binaries, and model checkpoints (avoid committing large files)
+Dataset/*.bin
+Dataset/*.npy
+Dataset/*.pt
+Dataset/*.pth
+Dataset/*.pkl
+Dataset/__pycache__/
+checkpoints/
+logs/
+output/
+*.ckpt
+*.model
+*.h5
+
+# Misc
+*.log
+*.sqlite3
+pip-log.txt
+pip-delete-this-directory.txt
