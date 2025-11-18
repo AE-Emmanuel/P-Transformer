@@ -7,7 +7,7 @@ The final model is a 6-layer, 6-head transformer with ~77 million parameters.
 ## 🚀 Final Result
 
 After training for 5,000 steps on a single A100 GPU, the model achieved:
-* **Final Validation Loss:** `4.5826`
+* **Final Validation Loss:** `3.8256`
 
 It is capable of generating coherent, syntactically-aware Python code snippets :
 
